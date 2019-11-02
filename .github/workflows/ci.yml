@@ -15,5 +15,5 @@ jobs:
       env:
         ACCESS_TOKEN: ${{ secrets.CI }}
         BRANCH: gh-pages
-        FOLDER: static/dist
+        FOLDER: dist
         BUILD_SCRIPT: cd static && npm install && npm run build

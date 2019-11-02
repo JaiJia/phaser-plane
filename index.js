@@ -1,15 +1,29 @@
-const Koa = require('koa');
-const app = new Koa();
-const router = require('./router');
-const path = require('path');
-const static = require('koa-static');
+import Phaser from 'phaser';
+import { globalConfig } from './game.config';
+import * as _  from 'lodash';
+import { Scene1 } from './scene/Scene1';
+import { Scene2 } from './scene/Scene2';
 
-const staticPath = './static/dist';
+window._ = _;
 
-app.use(static(path.join(__dirname, staticPath)));
+window.gameSettings = {
+    playerSpeed: 400,
+    maxPowerups: 5,
+    powerUpVel: 100,
+};
 
-app.use(router.routes(),router.allowedMethods());
-
-app.listen(3000, () => {
-    console.log(`Start Playing Now!`);
+window.config = _.merge(globalConfig, {
+    backgroundColor: 0x000000,
+    scene: [Scene1, Scene2],
+    pixelArt: true,
+    physics: {
+        default: "arcade",
+        arcade:{
+            debug: false,
+            debugShowVelocity: false
+        }
+    }
 });
+
+
+window.game = new Phaser.Game(config);

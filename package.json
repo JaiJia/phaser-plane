@@ -1,19 +1,30 @@
 {
-  "name": "phaser-plane",
+  "name": "static",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "homepage": "https://github.com/JaiJia/phaser-plane",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "koa": "^2.11.0",
-    "koa-route": "^3.2.0",
-    "koa-router": "^7.4.0",
-    "koa-send": "^5.0.0",
-    "koa-static": "^5.0.0"
+    "copy-webpack-plugin": "^5.0.4",
+    "imagemin-loader": "^1.1.1",
+    "imagemin-pngquant": "^8.0.0",
+    "img-loader": "^3.0.1",
+    "lodash": "^4.17.15",
+    "phaser": "^3.20.1"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "file-loader": "^4.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
   }
 }

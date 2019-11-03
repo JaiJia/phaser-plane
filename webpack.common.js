@@ -10,6 +10,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
+            template: path.join(__dirname, 'index.html'),
+            filename: 'index.html',
             title: 'Yo Yo Yo!',
         }),
         new CopyPlugin([

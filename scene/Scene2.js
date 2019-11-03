@@ -11,10 +11,15 @@ class Scene2 extends Phaser.Scene {
 
     this.background = this.add.tileSprite(0, 0, config.width, config.height, "background");
     this.background.setOrigin(0, 0);
+    this.background.setScale(config.width / this.background.potWidth);
 
     this.ship1 = this.add.sprite(config.width / 2 - 50, config.height / 2, "ship");
     this.ship2 = this.add.sprite(config.width / 2, config.height / 2, "ship2");
     this.ship3 = this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
+
+    this.ship1.setScale(gameSettings.eleScale);
+    this.ship2.setScale(gameSettings.eleScale);
+    this.ship3.setScale(gameSettings.eleScale);
 
     this.enemies = this.physics.add.group();
     this.enemies.add(this.ship1);
@@ -39,6 +44,7 @@ class Scene2 extends Phaser.Scene {
 
     for (var i = 0; i < gameSettings.maxPowerups; i++) {
       var powerUp = this.physics.add.sprite(16, 16, "power-up");
+      powerUp.setScale(gameSettings.eleScale);
       this.powerUps.add(powerUp);
       powerUp.setRandomPosition(0, 0, game.config.width, game.config.height);
 
@@ -57,9 +63,20 @@ class Scene2 extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
     this.player.play("thrust");
-    this.player.scale = 2;
+    this.player.scale = gameSettings.eleScale;
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.player.setCollideWorldBounds(true);
+
+    this.input.on("pointerdown", this.selectPlayer, this);
+    this.input.on("pointermove", this.movePlayer, this);
+    this.input.on("pointerup", this.releasePlayer, this);
+
+    this.time.addEvent({
+      delay: 300,
+      callback: this.shootBeam,
+      callbackScope: this,
+      loop: true
+    });
 
 
 
@@ -82,8 +99,8 @@ class Scene2 extends Phaser.Scene {
     graphics.beginPath();
     graphics.moveTo(0, 0);
     graphics.lineTo(config.width, 0);
-    graphics.lineTo(config.width, 20);
-    graphics.lineTo(0, 20);
+    graphics.lineTo(config.width, 20 * gameSettings.eleScale);
+    graphics.lineTo(0, 20 * gameSettings.eleScale);
     graphics.lineTo(0, 0);
     //
     graphics.closePath();
@@ -91,8 +108,38 @@ class Scene2 extends Phaser.Scene {
 
     this.score = 0;
     var scoreFormated = this.zeroPad(this.score, 6);
-    this.scoreLabel = this.add.bitmapText(10, 5, "pixelFont", "SCORE " + scoreFormated  , 16);
+    this.scoreLabel = this.add.bitmapText(
+        10 * gameSettings.eleScale,
+        5 * gameSettings.eleScale,
+        "pixelFont",
+        "SCORE " + scoreFormated,
+        16 * gameSettings.eleScale
+    );
+  }
 
+  selectPlayer(pointer) {
+    const playerX = this.player.x;
+    const playerY = this.player.y;
+    if (this.player.body.enable &&
+        (pointer.x >= playerX && pointer.x <= playerX + 32) ||
+        (pointer.y >= playerY && pointer.y <= playerY + 48)) {
+      this.isPlayerSelected = true;
+    } else {
+      this.isPlayerSelected = false;
+    }
+  }
+
+  movePlayer(pointer) {
+    if (this.isPlayerSelected && this.player.body.enable) {
+      this.player.x = pointer.x;
+      this.player.y = pointer.y;
+    } else {
+      this.isPlayerSelected = false;
+    }
+  }
+
+  releasePlayer(pointer) {
+    this.isPlayerSelected = false;
   }
 
   pickPowerUp(player, powerUp) {
@@ -178,9 +225,9 @@ class Scene2 extends Phaser.Scene {
 
 
 
-    this.moveShip(this.ship1, 1);
-    this.moveShip(this.ship2, 2);
-    this.moveShip(this.ship3, 3);
+    this.moveShip(this.ship1, 1 * gameSettings.eleScale);
+    this.moveShip(this.ship2, 2 * gameSettings.eleScale);
+    this.moveShip(this.ship3, 3 * gameSettings.eleScale);
     // for testing purpouses
     // this.ship1.destroy();
     // this.ship2.destroy();

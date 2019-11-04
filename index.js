@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import * as _  from 'lodash';
+import * as _ from 'lodash';
 import { Scene1 } from './scene/Scene1';
 import { Scene2 } from './scene/Scene2';
 
@@ -11,16 +11,39 @@ window._ = _;
 window.config = {
     width: clientWidth,
     height: clientHeight,
-    type: Phaser.CANVAS,
+    // scale: {
+    //     mode: Phaser.Scale.FIT,
+    //     autoCenter: Phaser.Scale.CENTER_BOTH
+    // },
+    type: Phaser.AUTO,
+    parent: 'canvas',
     backgroundColor: 0x000000,
     scene: [Scene1, Scene2],
     pixelArt: true,
     physics: {
-        default: "arcade",
-        arcade:{
+        default: 'arcade',
+        arcade: {
             debug: false,
             debugShowVelocity: false
         }
+    },
+    fps: {
+        min: 10,
+        target: 40,
+        forceSetTimeOut: false,
+        deltaHistory: 10
+    },
+    disableContextMenu: false,
+    banner: {
+        hidePhaser: false,
+        text: '#ffffff',
+        background: [
+            '#ff0000',
+            '#ffff00',
+            '#00ff00',
+            '#00ffff',
+            '#000000'
+        ]
     }
 };
 

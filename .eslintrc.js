@@ -5,6 +5,14 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "globals": {
+        "require": true,
+        "module": true,
+        "__dirname": true,
+        "Phaser": true,
+        "gameSettings": true,
+        "game": true,
+        "config": true,
+
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
@@ -13,5 +21,7 @@ module.exports = {
         "sourceType": "module"
     },
     "rules": {
+        "quotes": ["warn", "single"],
+        "no-var": ["warn"]
     }
 };

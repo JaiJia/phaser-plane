@@ -114,7 +114,6 @@ class Scene1 extends Phaser.Scene {
             key: 'enemy_beam_anim',
             frames: this.anims.generateFrameNumbers('beam'),
             frameRate: 10,
-            angle: 180,
             repeat: -1
         });
 

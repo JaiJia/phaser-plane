@@ -16,6 +16,8 @@ module.exports = {
         }),
         new CopyPlugin([
             { from: 'assets', to: 'assets' },
+            'CNAME',
+            'favicon.ico',
         ]),
         new webpack.ProvidePlugin({
             Phaser: 'phaser',
@@ -24,7 +26,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(png|svg|jpg|gif)$/,
+                test: /\.(png|svg|jpe?g|gif)$/,
                 use: [
                     'file-loader'
                 ]
@@ -32,25 +34,26 @@ module.exports = {
             {
                 test: /\.(woff|woff2|eot|ttf|otf)$/,
                 use: [
-                    'file-loader'
+                    'file-loader',
+                    'image-webpack-loader'
                 ]
             },
-            { // assets文件夹是复制到dist的，所以这里的压缩暂时无效
-                test: /\.(png|jpg|jpeg|gif)$/,
-                use: [
-                    {
-                        loader: 'img-loader',
-                        options: {
-                            plugins: [
-                                // 用于图片压缩的imagemin-pngquant，还有一个隐式调用的加载器imagemin-loader
-                                require('imagemin-pngquant')({
-                                    quality: [0.3, 0.5] // 图片压缩30%~50%
-                                })
-                            ]
-                        }
-                    }
-                ]
-            }
+            // { // assets文件夹是复制到dist的，所以这里的压缩暂时无效
+            //     test: /\.(png|jpg|jpeg|gif)$/,
+            //     use: [
+            //         {
+            //             loader: 'img-loader',
+            //             options: {
+            //                 plugins: [
+            //                     // 用于图片压缩的imagemin-pngquant，还有一个隐式调用的加载器imagemin-loader
+            //                     require('imagemin-pngquant')({
+            //                         quality: [0.3, 0.5] // 图片压缩30%~50%
+            //                     })
+            //                 ]
+            //             }
+            //         }
+            //     ]
+            // }
         ]
     },
     output: {

@@ -94,21 +94,13 @@ class Scene2 extends Phaser.Scene {
         this.background.tilePositionY -= 0.5;
 
         this.PlayerHelper.movePlayerManager();
-
-        if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-            if (this.player.active) {
-                this.shootBeam();
-            }
-        }
-        // for (let i = 0; i < this.projectiles.getChildren().length; i++) {
-        //     let beam = this.projectiles.getChildren()[i];
-        //     beam.update();
-        // }
-        // for (let beam of this.projectiles.getChildren()) {
-        //     beam.update();
-        // }
         this.projectiles.getChildren().forEach(beam => { beam.update() });
 
+        // if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+        //     if (this.player.active) {
+        //         this.shootBeam();
+        //     }
+        // }
     }
 
     hurtPlayer(player, enemy) {

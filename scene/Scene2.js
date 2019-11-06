@@ -1,11 +1,16 @@
 import { Beam } from '../action/beam';
 import { EnemyBeam } from '../action/enemy.beam';
 import { Explosion } from '../action/explosion';
+import { BackgroundHelper } from '../helper/background.helper';
+import { PowerupHelper } from '../helper/powerup.helper';
+import { PlayerHelper } from '../helper/player.helper';
 
 class Scene2 extends Phaser.Scene {
     constructor() {
         super('playGame');
-
+        this.BackgroundHelper = new BackgroundHelper(this);
+        this.PowerupHelper = new PowerupHelper(this);
+        this.PlayerHelper = new PlayerHelper(this);
     }
 
     create() {
@@ -34,29 +39,17 @@ class Scene2 extends Phaser.Scene {
         this.ship2.setInteractive();
         this.ship3.setInteractive();
 
+        this.ship1.body.velocity.y= _.random(...gameSettings.enemySpeedY);
+        this.ship2.body.velocity.y= _.random(...gameSettings.enemySpeedY);
+        this.ship3.body.velocity.y= _.random(...gameSettings.enemySpeedY);
+
         this.input.on('gameobjectdown', this.destroyShip, this);
 
         this.physics.world.setBoundsCollision();
 
         this.powerUps = this.physics.add.group();
 
-        for (let i = 0; i < gameSettings.maxPowerups; i++) {
-            let powerUp = this.physics.add.sprite(16, 16, 'power-up');
-            powerUp.setScale(gameSettings.eleScale);
-            this.powerUps.add(powerUp);
-            powerUp.setRandomPosition(0, 0, game.config.width, game.config.height);
-
-            if (Math.random() > 0.5) {
-                powerUp.play('red');
-            } else {
-                powerUp.play('gray');
-            }
-
-            powerUp.setVelocity(gameSettings.powerUpVel, gameSettings.powerUpVel);
-            powerUp.setCollideWorldBounds(true);
-            powerUp.setBounce(1);
-
-        }
+        this.PowerupHelper.generatePowerups();
 
         this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, 'player');
         this.player.play('thrust');
@@ -64,9 +57,9 @@ class Scene2 extends Phaser.Scene {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player.setCollideWorldBounds(true);
 
-        this.input.on('pointerdown', this.selectPlayer, this);
-        this.input.on('pointermove', this.movePlayer, this);
-        this.input.on('pointerup', this.releasePlayer, this);
+        this.input.on('pointerdown', this.PlayerHelper.selectPlayer, this.PlayerHelper);
+        this.input.on('pointermove', this.PlayerHelper.movePlayer, this.PlayerHelper);
+        this.input.on('pointerup', this.PlayerHelper.releasePlayer, this.PlayerHelper);
 
         this.autoShootBeam();
         this.autoEnemyShootBeam();
@@ -75,87 +68,47 @@ class Scene2 extends Phaser.Scene {
 
         this.projectiles = this.add.group();
 
-        // this.physics.add.collider(this.projectiles, this.powerUps, function (projectile) {
-        //     projectile.destroy();
-        // });
-
         this.physics.add.collider(this.projectiles, this.player, (projectile, player) => {
             this.hurtPlayer(player, projectile);
         });
 
-        this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
+        this.physics.add.overlap(this.player, this.powerUps, this.PowerupHelper.pickPowerUp, null, this.PowerupHelper);
 
         this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, null, this);
 
         this.physics.add.overlap(this.projectiles, this.enemies, this.hitEnemy, null, this);
-
-        let graphics = this.add.graphics();
-        graphics.fillStyle(0x000000, 1);
-        graphics.beginPath();
-        graphics.moveTo(0, 0);
-        graphics.lineTo(config.width, 0);
-        graphics.lineTo(config.width, 20 * gameSettings.eleScale);
-        graphics.lineTo(0, 20 * gameSettings.eleScale);
-        graphics.lineTo(0, 0);
-        graphics.closePath();
-        graphics.fillPath();
-
-        this.score = 0;
-        let scoreFormated = this.zeroPad(this.score, 6);
-        this.scoreLabel = this.add.bitmapText(
-            10 * gameSettings.eleScale,
-            5 * gameSettings.eleScale,
-            'pixelFont',
-            'SCORE ' + scoreFormated,
-            16 * gameSettings.eleScale
-        );
 
         this.beamSound = this.sound.add('audio_beam');
         this.explosionSound = this.sound.add('audio_explosion');
         this.pickupSound = this.sound.add('audio_pickup');
         this.music = this.sound.add('music');
 
-        const musicConfig = {
-            mute: false,
-            volume: 1,
-            rate: 1,
-            detune: 0,
-            seek: 0,
-            loop: false,
-            delay: 0,
-        };
-        this.music.play(musicConfig);
+        this.BackgroundHelper.init();
     }
 
-    selectPlayer(pointer) {
-        const playerX = this.player.x;
-        const playerY = this.player.y;
-        if (this.player.body.enable &&
-            (pointer.x >= playerX && pointer.x <= playerX + 32) ||
-            (pointer.y >= playerY && pointer.y <= playerY + 48)) {
-            this.isPlayerSelected = true;
-        } else {
-            this.isPlayerSelected = false;
+    update() {
+        this.moveShip(this.ship1);
+        this.moveShip(this.ship2);
+        this.moveShip(this.ship3);
+
+        this.background.tilePositionY -= 0.5;
+
+        this.PlayerHelper.movePlayerManager();
+
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+            if (this.player.active) {
+                this.shootBeam();
+            }
         }
-    }
+        // for (let i = 0; i < this.projectiles.getChildren().length; i++) {
+        //     let beam = this.projectiles.getChildren()[i];
+        //     beam.update();
+        // }
+        // for (let beam of this.projectiles.getChildren()) {
+        //     beam.update();
+        // }
+        this.projectiles.getChildren().forEach(beam => { beam.update() });
 
-    movePlayer(pointer) {
-        if (this.isPlayerSelected && this.player.body.enable) {
-            this.player.x = pointer.x;
-            this.player.y = pointer.y;
-        } else {
-            this.isPlayerSelected = false;
-        }
-    }
-
-    releasePlayer() {
-        this.isPlayerSelected = false;
-    }
-
-    pickPowerUp(player, powerUp) {
-        powerUp.disableBody(true, true);
-        this.pickupSound.play();
-        player.level = (player.level || 0) + 1;
     }
 
     hurtPlayer(player, enemy) {
@@ -223,49 +176,13 @@ class Scene2 extends Phaser.Scene {
         this.resetShipPos(enemy);
         this.score += 15;
 
-        let scoreFormated = this.zeroPad(this.score, 6);
+        let scoreFormated = this.BackgroundHelper.zeroPad(this.score, 6);
         this.scoreLabel.text = 'SCORE ' + scoreFormated;
-    }
-
-
-    zeroPad(number, size) {
-        let stringNumber = String(number);
-        while (stringNumber.length < (size || 2)) {
-            stringNumber = '0' + stringNumber;
-        }
-        return stringNumber;
-    }
-
-
-    update() {
-
-        this.moveShip(this.ship1, 1 * gameSettings.eleScale);
-        this.moveShip(this.ship2, 2 * gameSettings.eleScale);
-        this.moveShip(this.ship3, 3 * gameSettings.eleScale);
-        // for testing purpouses
-        // this.ship1.destroy();
-        // this.ship2.destroy();
-        // this.ship3.destroy();
-
-        this.background.tilePositionY -= 0.5;
-
-        this.movePlayerManager();
-
-        if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-            if (this.player.active) {
-                this.shootBeam();
-            }
-        }
-        for (let i = 0; i < this.projectiles.getChildren().length; i++) {
-            let beam = this.projectiles.getChildren()[i];
-            beam.update();
-        }
-
     }
 
     autoShootBeam() {
         this.shootBeamTimer = this.time.addEvent({
-            delay: 400,
+            delay: gameSettings.playerShootDelay,
             callback: this.shootBeam,
             callbackScope: this,
             loop: true
@@ -279,34 +196,32 @@ class Scene2 extends Phaser.Scene {
                 new Beam(this, -20);
                 new Beam(this, 20);
                 break;
-            // case 2:
-            // case 3:
-            // case 4:
-            // case 5:
-            // case 6:
-            //     new Beam(this);
-            //     new Beam(this, -20);
-            //     new Beam(this, 20);
-            //     new Beam(this, -40);
-            //     new Beam(this, 40);
-            //     break;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                new Beam(this);
+                new Beam(this, -20);
+                new Beam(this, 20);
+                new Beam(this, -40);
+                new Beam(this, 40);
+                break;
             default:
                 new Beam(this);
                 break;
         }
-        new Beam(this);
         this.beamSound.play();
-        console.log(this.projectiles.getChildren());
         for(let item of this.projectiles.getChildren()) {
             if (item.owner === 'player' && item.body.velocity.y > -200) {
-                item.destroy();
+                item.body.velocity.y = -250;
             }
         }
     }
 
     autoEnemyShootBeam() {
         this.shootEnemyBeamTimer = this.time.addEvent({
-            delay: 620,
+            delay: gameSettings.enemyShootDelay,
             callback: this.enemyShootBeam,
             callbackScope: this,
             loop: true
@@ -318,25 +233,7 @@ class Scene2 extends Phaser.Scene {
         this.beamSound.play();
     }
 
-    movePlayerManager() {
-
-        this.player.setVelocity(0);
-
-        if (this.cursorKeys.left.isDown) {
-            this.player.setVelocityX(-gameSettings.playerSpeed);
-        } else if (this.cursorKeys.right.isDown) {
-            this.player.setVelocityX(gameSettings.playerSpeed);
-        }
-
-        if (this.cursorKeys.up.isDown) {
-            this.player.setVelocityY(-gameSettings.playerSpeed);
-        } else if (this.cursorKeys.down.isDown) {
-            this.player.setVelocityY(gameSettings.playerSpeed);
-        }
-    }
-
-    moveShip(ship, speed) {
-        ship.y += speed;
+    moveShip(ship) {
         if (ship.y > config.height) {
             this.resetShipPos(ship);
         }
@@ -347,7 +244,6 @@ class Scene2 extends Phaser.Scene {
         let randomX = Phaser.Math.Between(0, config.width);
         ship.x = randomX;
     }
-
 
     destroyShip(pointer, gameObject) {
         gameObject.setTexture('explosion');

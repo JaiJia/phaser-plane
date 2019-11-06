@@ -50,8 +50,17 @@ window.config = {
 window.game = new Phaser.Game(config);
 
 window.gameSettings = {
+    // playerSize: [16, 24],
+    // beamSize: [16, 16],
     playerSpeed: 400,
-    maxPowerups: 5,
+    playerBeamSpeedY: 250,
+    playerShootDelay: 400,
+    enemySpeedY: [150, 300],
+    enemyBeamSpeedX: 0,
+    // enemyBeamSpeedX: [150, 200],
+    enemyBeamSpeedY: [301, 500],
+    enemyShootDelay: 620,
+    maxPowerups: 3,
     powerUpVel: 100,
     isPC: !!game.device.os.desktop,
     eleScale: game.device.os.desktop ? 2 : 3,

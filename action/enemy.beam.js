@@ -19,9 +19,10 @@ class EnemyBeam extends Phaser.GameObjects.Sprite {
 
         this.play('enemy_beam_anim');
         scene.physics.world.enableBody(this);
-        this.body.velocity.y = (300 + Math.round(Math.random() * 200)) * directionY;
+        this.body.velocity.y = _.random(...gameSettings.enemyBeamSpeedY) * directionY;
         // this.body.velocity.x = (150 + Math.round(Math.random() * 50)) * directionX;
         this.body.velocity.x = 0;
+        this.setAngle(180);
 
         scene.projectiles.add(this);
     }

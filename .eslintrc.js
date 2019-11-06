@@ -12,6 +12,7 @@ module.exports = {
         "gameSettings": true,
         "game": true,
         "config": true,
+        "_": true,
 
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"

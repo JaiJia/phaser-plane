@@ -183,24 +183,20 @@ class Scene2 extends Phaser.Scene {
 
     shootBeam() {
         switch (this.player.level) {
+            case 0:
+                new Beam(this);
+                break;
             case 1:
                 new Beam(this);
                 new Beam(this, -20);
                 new Beam(this, 20);
                 break;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
+            default:
                 new Beam(this);
                 new Beam(this, -20);
                 new Beam(this, 20);
                 new Beam(this, -40);
                 new Beam(this, 40);
-                break;
-            default:
-                new Beam(this);
                 break;
         }
         this.beamSound.play();

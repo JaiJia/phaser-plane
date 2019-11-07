@@ -16,7 +16,6 @@ module.exports = {
         }),
         new CopyPlugin([
             { from: 'assets', to: 'assets' },
-            'CNAME',
             'favicon.ico',
         ]),
         new webpack.ProvidePlugin({
